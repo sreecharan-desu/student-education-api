@@ -29,3 +29,5 @@ Thumbs.db
 
 # Prisma generated
 /generated/prisma
+.vercel
+.env*
