@@ -1,0 +1,220 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TaskType {
+  QUIZ
+  ASSIGNMENT
+  HOMEWORK
+  EXAM
+}
+
+enum TaskPublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum StudentTaskStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  COMPLETED
+  OVERDUE
+}
+
+enum ContentType {
+  LESSON
+  CHAPTER
+  SECTION
+}
+
+enum AudienceType {
+  ALL_STUDENTS
+  CLASS
+}
+
+model Student {
+  id           String   @id @default(uuid()) @db.Uuid
+  fullName     String   @map("full_name")
+  email        String?  @unique
+  passwordHash String?  @map("password_hash")
+  avatarUrl    String?  @map("avatar_url")
+  classLevel   Int      @map("class_level") // Classes 6 to 10
+  board        String   // "Andhra Pradesh State Board"
+  medium       String?  // e.g. "English", "Telugu"
+  academicYear String   @map("academic_year") // "2026-2027"
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  studentTasks      StudentTask[]
+  learningProgress  StudentLearningProgress[]
+  announcementReads AnnouncementRead[]
+  bookmarks         Bookmark[]
+
+  @@index([classLevel, board, academicYear])
+  @@map("students")
+}
+
+model Subject {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  code         String
+  iconKey      String?  @map("icon_key")
+  classLevel   Int      @map("class_level")
+  board        String
+  medium       String?
+  academicYear String   @map("academic_year")
+  isActive     Boolean  @default(true) @map("is_active")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  learningTasks LearningTask[]
+  learningItems LearningItem[]
+
+  @@unique([code, classLevel, board, academicYear, medium])
+  @@index([classLevel, board, academicYear, isActive])
+  @@map("subjects")
+}
+
+model LearningTask {
+  id            String                @id @default(uuid()) @db.Uuid
+  title         String
+  description   String?
+  taskType      TaskType              @map("task_type")
+  subjectId     String                @map("subject_id") @db.Uuid
+  classLevel    Int                   @map("class_level")
+  academicYear  String                @map("academic_year")
+  dueAt         DateTime?             @map("due_at")
+  availableFrom DateTime?             @map("available_from")
+  status        TaskPublicationStatus @default(PUBLISHED)
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  subject      Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  studentTasks StudentTask[]
+
+  @@index([classLevel, academicYear, status])
+  @@index([subjectId])
+  @@index([dueAt])
+  @@map("learning_tasks")
+}
+
+model StudentTask {
+  id          String            @id @default(uuid()) @db.Uuid
+  studentId   String            @map("student_id") @db.Uuid
+  taskId      String            @map("task_id") @db.Uuid
+  status      StudentTaskStatus @default(PENDING)
+  startedAt   DateTime?         @map("started_at")
+  submittedAt DateTime?         @map("submitted_at")
+  completedAt DateTime?         @map("completed_at")
+  score       Float?
+  feedback    String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  student Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  task    LearningTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, taskId])
+  @@index([studentId, status])
+  @@index([taskId])
+  @@map("student_tasks")
+}
+
+model LearningItem {
+  id           String      @id @default(uuid()) @db.Uuid
+  subjectId    String      @map("subject_id") @db.Uuid
+  title        String
+  description  String?
+  contentType  ContentType @default(LESSON) @map("content_type")
+  parentId     String?     @map("parent_id") @db.Uuid
+  displayOrder Int         @default(0) @map("display_order")
+  isPublished  Boolean     @default(true) @map("is_published")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  subject         Subject                   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  parent          LearningItem?             @relation("ItemHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children        LearningItem[]            @relation("ItemHierarchy")
+  studentProgress StudentLearningProgress[]
+  bookmarks       Bookmark[]
+
+  @@index([subjectId, isPublished])
+  @@index([parentId])
+  @@map("learning_items")
+}
+
+model StudentLearningProgress {
+  id              String    @id @default(uuid()) @db.Uuid
+  studentId       String    @map("student_id") @db.Uuid
+  learningItemId  String    @map("learning_item_id") @db.Uuid
+  progressPercent Float     @default(0) @map("progress_percent")
+  lastPosition    String?   @map("last_position")
+  lastAccessedAt  DateTime  @default(now()) @map("last_accessed_at")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  learningItem LearningItem @relation(fields: [learningItemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, learningItemId])
+  @@index([studentId, lastAccessedAt])
+  @@map("student_learning_progress")
+}
+
+model Announcement {
+  id           String       @id @default(uuid()) @db.Uuid
+  title        String
+  message      String
+  audienceType AudienceType @default(ALL_STUDENTS) @map("audience_type")
+  classLevel   Int?         @map("class_level")
+  academicYear String       @map("academic_year")
+  publishedAt  DateTime     @default(now()) @map("published_at")
+  expiresAt    DateTime?    @map("expires_at")
+  isPublished  Boolean      @default(true) @map("is_published")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  reads AnnouncementRead[]
+
+  @@index([audienceType, classLevel, academicYear, isPublished])
+  @@index([publishedAt])
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  id             String   @id @default(uuid()) @db.Uuid
+  announcementId String   @map("announcement_id") @db.Uuid
+  studentId      String   @map("student_id") @db.Uuid
+  readAt         DateTime @default(now()) @map("read_at")
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, studentId])
+  @@index([studentId])
+  @@map("announcement_reads")
+}
+
+model Bookmark {
+  id             String   @id @default(uuid()) @db.Uuid
+  studentId      String   @map("student_id") @db.Uuid
+  learningItemId String   @map("learning_item_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  learningItem LearningItem @relation(fields: [learningItemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, learningItemId])
+  @@index([studentId, createdAt])
+  @@map("bookmarks")
+}
