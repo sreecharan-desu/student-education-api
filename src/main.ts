@@ -97,10 +97,17 @@ async function bootstrap() {
   await app.listen(port, host);
 
   logger.log(`=============================================================`);
-  logger.log(`🚀 Student Education API running at: http://localhost:${port}/api/v1`);
-  logger.log(`📖 Swagger API Documentation at:     http://localhost:${port}/api/docs`);
-  logger.log(`📱 LAN Mobile Network Access at:     http://192.168.0.126:${port}/api/v1`);
+  logger.log(`[SERVER] Student Education API running at: http://localhost:${port}/api/v1`);
+  logger.log(`[SWAGGER] Swagger API Documentation at:     http://localhost:${port}/api/docs`);
+  logger.log(`[LAN] LAN Mobile Network Access at:         http://192.168.0.126:${port}/api/v1`);
   logger.log(`=============================================================`);
+
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 }
+
+declare const module: any;
 
 void bootstrap();

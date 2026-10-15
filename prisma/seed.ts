@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed for Student Education Dashboard (AP State Board 2026-2027)...');
+  console.log('[SEED] Starting database seed for Student Education Dashboard (AP State Board 2026-2027)...');
 
   // 1. Password Hashing
   const defaultPassword = 'Student@2026!';
@@ -61,7 +61,7 @@ async function main() {
     },
   });
 
-  console.log(`✓ Seeded demo students: ${demoStudent.email} & ${peerStudent.email}`);
+  console.log(`[OK] Seeded demo students: ${demoStudent.email} & ${peerStudent.email}`);
 
   // 3. Subjects for Class 8 (SCERT AP Curriculum: 7 Subjects)
   const class8SubjectsData = [
@@ -149,7 +149,7 @@ async function main() {
     });
   }
 
-  console.log('✓ Seeded subjects for Class 7 and Class 8');
+  console.log('[OK] Seeded subjects for Class 7 and Class 8');
 
   // 4. Learning Items for Class 8
   const mathId = subjectsMap['MATH08'];
@@ -307,7 +307,7 @@ async function main() {
     },
   });
 
-  console.log('✓ Seeded chapters and lessons for Math, Physical Science, and Bio');
+  console.log('[OK] Seeded chapters and lessons for Math, Physical Science, and Bio');
 
   // 5. Student Learning Progress (Demo Student)
   // Math Lesson 1: 100% completed
@@ -382,7 +382,7 @@ async function main() {
     },
   });
 
-  console.log('✓ Seeded student learning progress');
+  console.log('[OK] Seeded student learning progress');
 
   // 6. Learning Tasks & Student Tasks
   const now = new Date();
@@ -609,7 +609,7 @@ async function main() {
     },
   });
 
-  console.log('✓ Seeded learning tasks and student task states');
+  console.log('[OK] Seeded learning tasks and student task states');
 
   // 7. Announcements
   const ann1 = await prisma.announcement.upsert({
@@ -700,7 +700,7 @@ async function main() {
     },
   });
 
-  console.log('✓ Seeded announcements and read states');
+  console.log('[OK] Seeded announcements and read states');
 
   // 8. Bookmarks
   await prisma.bookmark.upsert({
@@ -717,13 +717,13 @@ async function main() {
     },
   });
 
-  console.log('✓ Seeded bookmarks');
-  console.log('🎉 Database seeding completed successfully!');
+  console.log('[OK] Seeded bookmarks');
+  console.log('[SUCCESS] Database seeding completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during seeding:', e);
+    console.error('[ERROR] Error during seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

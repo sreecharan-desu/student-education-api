@@ -22,7 +22,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     try {
       await this.$connect();
-      this.logger.log('✓ Successfully connected to PostgreSQL (student_education_db)');
+      this.logger.log('[OK] Successfully connected to PostgreSQL (student_education_db)');
     } catch (error) {
       this.logger.warn(
         'PostgreSQL connection could not be established during module init (expected in cloud deployments when local DB tunnel is inactive). Queries will attempt connection on demand.',

@@ -5,7 +5,7 @@ Production-oriented, in-house local backend built from scratch for the Student E
 
 ---
 
-## 🚀 Technology Stack
+## Technology Stack
 
 - **Framework:** [NestJS](https://nestjs.com/) (Modular architecture)
 - **HTTP Adapter:** [Fastify](https://www.fastify.io/) (`@nestjs/platform-fastify`)
@@ -21,7 +21,7 @@ Production-oriented, in-house local backend built from scratch for the Student E
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Local PostgreSQL & pgAdmin 4 Setup Guide](#1-local-postgresql--pgadmin-4-setup-guide)
 2. [Environment Configuration](#2-environment-configuration)
@@ -141,10 +141,25 @@ npm run seed
 
 ## 4. Running the Application
 
-### Development Mode (with hot-reload)
+### Single Command Startup (Recommended)
+Whenever the server or database is stopped, start everything with a single command:
 ```bash
-npm run start:dev
+./start.sh
 ```
+or:
+```bash
+npm run dev
+```
+
+What this single command does automatically:
+1. Validates `.env` and environment settings.
+2. Starts the local Docker PostgreSQL container (`vidya-postgres`) if stopped.
+3. Generates Prisma Client.
+4. Detects your LAN IP address and prints connection URLs.
+5. Boots Fastify with **Hot Module Replacement (HMR)** enabled.
+
+### Hot Module Replacement (In-Memory Hot Reload)
+Changes made to controllers, services, DTOs, or modules hot reload **in-memory via Webpack HMR without restarting the server process**, eliminating downtime during development.
 
 ### Production Build & Run
 ```bash
@@ -152,7 +167,7 @@ npm run build
 npm run start:prod
 ```
 
-When started, the backend binds to `0.0.0.0`, allowing access from both localhost and local devices on the same Wi-Fi.
+When started, the backend binds to `0.0.0.0`, allowing access from localhost, simulator, and any device connected to the same local Wi-Fi network.
 
 ---
 
@@ -278,19 +293,19 @@ npm run test:cov
 ```
 
 ### Test Coverage Highlights:
-- ✅ Health check verification & safe DB status
-- ✅ Valid login returning JWT access token & sanitized profile
-- ✅ Invalid credentials returning generic errors (no email enumeration)
-- ✅ Token absence & unauthorized rejection
-- ✅ Aggregated dashboard response completeness
-- ✅ Subject curriculum isolation (Class 8 vs Class 7)
-- ✅ Dynamic task overdue derivation & period filtering
-- ✅ Continue-learning resumption logic
-- ✅ Progress calculations (lessons, tasks, quiz scores, weekly activity)
-- ✅ Announcement audience filtering (Class 8 vs Class 10 isolation)
-- ✅ Idempotent announcement read marking
-- ✅ Cross-student data isolation (Student A cannot access Student B's bookmarks or records)
-- ✅ Query parameter DTO validation & bad request rejection
+- [OK] Health check verification & safe DB status
+- [OK] Valid login returning JWT access token & sanitized profile
+- [OK] Invalid credentials returning generic errors (no email enumeration)
+- [OK] Token absence & unauthorized rejection
+- [OK] Aggregated dashboard response completeness
+- [OK] Subject curriculum isolation (Class 8 vs Class 7)
+- [OK] Dynamic task overdue derivation & period filtering
+- [OK] Continue-learning resumption logic
+- [OK] Progress calculations (lessons, tasks, quiz scores, weekly activity)
+- [OK] Announcement audience filtering (Class 8 vs Class 10 isolation)
+- [OK] Idempotent announcement read marking
+- [OK] Cross-student data isolation (Student A cannot access Student B's bookmarks or records)
+- [OK] Query parameter DTO validation & bad request rejection
 
 ---
 
