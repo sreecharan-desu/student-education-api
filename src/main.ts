@@ -36,8 +36,10 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global Prefix: /api/v1
-  app.setGlobalPrefix('api/v1');
+  // Global Prefix: /api/v1 (exclude root / for automatic Swagger UI redirect)
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
 
   // Global Validation Pipe
   app.useGlobalPipes(
