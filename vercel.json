@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "prisma generate && npm run build",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
+}
